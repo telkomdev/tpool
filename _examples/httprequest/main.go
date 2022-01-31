@@ -37,7 +37,7 @@ func httpGet(url string) (*http.Response, error) {
 }
 
 func main() {
-	arg := "https://www.indihome.co.id/landingpage/regional4/form-registrasi"
+	arg := "https://www.w3schools.com/js/default.asp"
 	job1 := tpool.NewJob(arg, func(arg tpool.JobArg, res chan<- tpool.Result) error {
 		a := arg.(string)
 		start := time.Now()
