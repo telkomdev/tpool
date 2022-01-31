@@ -54,6 +54,11 @@ func (t ThreadPool) Result() <-chan Result {
 	return t.result
 }
 
+// Jobs will return jobs chan
+func (t ThreadPool) Jobs() chan<- Job {
+	return t.jobs
+}
+
 // GenerateJobFrom a function helper for generate job from job lists
 func (t ThreadPool) GenerateJobFrom(jobs []Job) {
 	go func() {
