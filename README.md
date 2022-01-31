@@ -1,6 +1,6 @@
 ## tpool
 
-A Worker Pool/ Thread Pool Implementation with Golang
+Golang Implementation of Worker Pool/ Thread Pool
 
 #
 
