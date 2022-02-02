@@ -15,7 +15,7 @@ Rather than spawning unlimited threads, we’ll have a fixed number of threads w
 
 ### Usage
 
-Simulate heavy job that takes 1 second each to complete the job with 3 worker it only takes 2 seconds instead 4 second
+Simulate heavy job that takes 1 second each to complete the job. With 3 worker it only takes 2 seconds instead 4 second
 
 try to modify
 ```
