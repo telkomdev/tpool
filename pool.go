@@ -21,6 +21,7 @@ func worker(id uint, ctx context.Context,
 		// compiler, so they are very efficient.
 		select {
 		case <-ctx.Done():
+			fmt.Printf("worker canceled\n")
 			return
 		default:
 		}
