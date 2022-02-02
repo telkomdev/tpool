@@ -18,10 +18,7 @@ type Job struct {
 
 // NewJob the job constructor
 func NewJob(arg JobArg, op JobFn) Job {
-	return Job{
-		arg: arg,
-		op:  op,
-	}
+	return Job{arg: arg, op: op}
 }
 
 // Execute will execute job's operation

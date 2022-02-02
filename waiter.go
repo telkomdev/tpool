@@ -31,6 +31,4 @@ func (w *waiter) Wait() {
 	}
 }
 
-func (w *waiter) Close() {
-	close(w.Sig)
-}
+func (w *waiter) Close() { close(w.Sig) }

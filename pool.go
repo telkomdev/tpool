@@ -12,6 +12,23 @@ func worker(id uint, ctx context.Context,
 	defer func() { waiter.Done() }()
 
 	for {
+
+		// The try-receive operation here is to
+		// try to exit the sender goroutine as
+		// early as possible. Try-receive and
+		// try-send select blocks are specially
+		// optimized by the standard Go
+		// compiler, so they are very efficient.
+		select {
+		case <-ctx.Done():
+			return
+		default:
+		}
+
+		// Even if ctx.Done() is set to closed, the first
+		// branch in this select block might be
+		// still not selected for some loops
+		// so the try-receive operation above is essential
 		select {
 		case job, ok := <-jobs:
 			if !ok {
@@ -50,14 +67,10 @@ func NewThreadPool(n uint) ThreadPool {
 }
 
 // Result will return result chan
-func (t ThreadPool) Result() <-chan Result {
-	return t.result
-}
+func (t ThreadPool) Result() <-chan Result { return t.result }
 
 // Jobs will return jobs chan
-func (t ThreadPool) Jobs() chan<- Job {
-	return t.jobs
-}
+func (t ThreadPool) Jobs() chan<- Job { return t.jobs }
 
 // GenerateJobFrom a function helper for generate job from job lists
 func (t ThreadPool) GenerateJobFrom(jobs []Job) {
