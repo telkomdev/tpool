@@ -15,7 +15,7 @@ func worker(id uint, ctx context.Context,
 
 		// The try-receive operation here is to
 		// try to exit the worker goroutine as
-		// early as possible. Try-receive is specially
+		// early as possible. Try-receive
 		// optimized by the standard Go
 		// compiler, so they are very efficient.
 		select {
