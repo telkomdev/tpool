@@ -13,5 +13,125 @@ We’ll limit the number of threads in the pool to a small number to protect us 
 
 Rather than spawning unlimited threads, we’ll have a fixed number of threads waiting in the pool. As requests come in, they’ll be sent to the pool for processing. The pool will maintain a queue of incoming requests. Each of the threads in the pool will pop off a request from this queue, handle the request, and then ask the queue for another request. With this design, we can process N requests concurrently, where N is the number of threads. If each thread is responding to a long-running request, subsequent requests can still back up in the queue, but we’ve increased the number of long-running requests we can handle before reaching that point.
 
-### Example
+### Usage
+
+Simulate heavy job that takes 1 second each to complete the job with 3 worker it only takes 2 seconds instead 4 second
+
+try to modify
+```
+threadPool := tpool.NewThreadPool(3)
+```
+to
+
+```
+threadPool := tpool.NewThreadPool(4)
+```
+
+and see what happen
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"time"
+
+	"github.com/telkomdev/tpool"
+)
+
+type Arg struct {
+	X uint
+	Y uint
+}
+
+func main() {
+
+	job1 := tpool.NewJob(Arg{
+		X: 5, Y: 10,
+	}, func(arg tpool.JobArg, res chan<- tpool.Result) error {
+		a := arg.(Arg)
+		r := a.X * a.Y
+		runIn := time.Duration(1000)
+		fmt.Printf("job run in %d ms\n", runIn)
+		time.Sleep(time.Millisecond * runIn)
+
+		res <- r
+		return nil
+	})
+
+	job2 := tpool.NewJob(Arg{
+		X: 25, Y: 4,
+	}, func(arg tpool.JobArg, res chan<- tpool.Result) error {
+		a := arg.(Arg)
+		r := a.X * a.Y
+		runIn := time.Duration(1000)
+		fmt.Printf("job run in %d ms\n", runIn)
+		time.Sleep(time.Millisecond * runIn)
+
+		res <- r
+		return nil
+	})
+
+	job3 := tpool.NewJob(Arg{
+		X: 100, Y: 4,
+	}, func(arg tpool.JobArg, res chan<- tpool.Result) error {
+		a := arg.(Arg)
+		r := a.X * a.Y
+		runIn := time.Duration(1000)
+		fmt.Printf("job run in %d ms\n", runIn)
+		time.Sleep(time.Millisecond * runIn)
+
+		res <- r
+		return nil
+	})
+
+	job4 := tpool.NewJob(Arg{
+		X: 5, Y: 5,
+	}, func(arg tpool.JobArg, res chan<- tpool.Result) error {
+		a := arg.(Arg)
+		r := a.X * a.Y
+		runIn := time.Duration(1000)
+		fmt.Printf("job run in %d ms\n", runIn)
+		time.Sleep(time.Millisecond * runIn)
+
+		res <- r
+		return nil
+	})
+
+	// start
+	start := time.Now()
+
+	jobs := []tpool.Job{job1, job2, job3, job4}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer func() { cancel() }()
+
+	threadPool := tpool.NewThreadPool(3)
+	threadPool.GenerateJobFrom(jobs)
+
+	threadPool.Run(ctx)
+
+	for {
+		select {
+		case r, ok := <-threadPool.Result():
+			if !ok {
+				break
+			}
+
+			fmt.Println(r)
+		case <-threadPool.Done:
+			fmt.Println("worker done")
+			elapsed := time.Since(start)
+
+			fmt.Printf("all worker run in %s\n", elapsed)
+			return
+		}
+	}
+
+}
+
+```
+
+### Full Example
 Open the `_example` folder
