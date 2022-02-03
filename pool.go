@@ -39,7 +39,6 @@ func worker(id uint, ctx context.Context,
 
 		case <-ctx.Done():
 			fmt.Printf("worker canceled\n")
-			waiter.Done()
 			return
 		}
 	}
