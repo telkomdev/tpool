@@ -7,8 +7,8 @@ import (
 
 type Result interface{}
 
-func worker(id uint, ctx context.Context,
-	waiter Waiter, jobs <-chan Job, res chan<- Result) {
+func worker[T any](id uint, ctx context.Context,
+	waiter Waiter, jobs <-chan Job[T], res chan<- Result) {
 	defer func() { waiter.Done() }()
 
 	for {
@@ -45,19 +45,19 @@ func worker(id uint, ctx context.Context,
 }
 
 // ThreadPool type
-type ThreadPool struct {
+type ThreadPool[T any] struct {
 	n      uint
 	result chan Result
-	jobs   chan Job
+	jobs   chan Job[T]
 	Done   chan bool
 }
 
 // NewThreadPool the ThreadPool's constructor
-func NewThreadPool(n uint) ThreadPool {
+func NewThreadPool[T any](n uint) ThreadPool[T] {
 	result := make(chan Result, n)
-	jobs := make(chan Job, n)
+	jobs := make(chan Job[T], n)
 	done := make(chan bool, 1)
-	return ThreadPool{
+	return ThreadPool[T]{
 		n:      n,
 		result: result,
 		jobs:   jobs,
@@ -66,13 +66,13 @@ func NewThreadPool(n uint) ThreadPool {
 }
 
 // Result will return result chan
-func (t ThreadPool) Result() <-chan Result { return t.result }
+func (t ThreadPool[T]) Result() <-chan Result { return t.result }
 
 // Jobs will return jobs chan
-func (t ThreadPool) Jobs() chan<- Job { return t.jobs }
+func (t ThreadPool[T]) Jobs() chan<- Job[T] { return t.jobs }
 
 // GenerateJobFrom a function helper for generate job from job lists
-func (t ThreadPool) GenerateJobFrom(jobs []Job) {
+func (t ThreadPool[T]) GenerateJobFrom(jobs []Job[T]) {
 	go func() {
 		for _, j := range jobs {
 			t.jobs <- j
@@ -83,7 +83,7 @@ func (t ThreadPool) GenerateJobFrom(jobs []Job) {
 }
 
 // Run will run thread pool
-func (t ThreadPool) Run(ctx context.Context) {
+func (t ThreadPool[T]) Run(ctx context.Context) {
 
 	go func() {
 		waiter := newWaiter(t.n)
