@@ -2,6 +2,9 @@
 
 Golang Implementation of Worker Pool/ Thread Pool
 
+### Requirements
+- Go 1.18+ (because `tpool` uses generic features)
+
 #
 
 ## What is Worker pool/ Thread Pool
@@ -19,12 +22,12 @@ Simulate heavy job that takes 1 second each to complete the job. With 3 worker i
 
 try to modify
 ```
-threadPool := tpool.NewThreadPool(3)
+threadPool := tpool.NewThreadPool[Arg, uint](3)
 ```
 to
 
 ```
-threadPool := tpool.NewThreadPool(4)
+threadPool := tpool.NewThreadPool[Arg, uint](3)
 ```
 
 and see what happen
@@ -46,12 +49,10 @@ type Arg struct {
 }
 
 func main() {
-
 	job1 := tpool.NewJob(Arg{
 		X: 5, Y: 10,
-	}, func(arg tpool.JobArg, res chan<- tpool.Result) error {
-		a := arg.(Arg)
-		r := a.X * a.Y
+	}, func(arg Arg, res chan<- uint) error {
+		r := arg.X * arg.Y
 		runIn := time.Duration(1000)
 		fmt.Printf("job run in %d ms\n", runIn)
 		time.Sleep(time.Millisecond * runIn)
@@ -62,9 +63,8 @@ func main() {
 
 	job2 := tpool.NewJob(Arg{
 		X: 25, Y: 4,
-	}, func(arg tpool.JobArg, res chan<- tpool.Result) error {
-		a := arg.(Arg)
-		r := a.X * a.Y
+	}, func(arg Arg, res chan<- uint) error {
+		r := arg.X * arg.Y
 		runIn := time.Duration(1000)
 		fmt.Printf("job run in %d ms\n", runIn)
 		time.Sleep(time.Millisecond * runIn)
@@ -75,9 +75,8 @@ func main() {
 
 	job3 := tpool.NewJob(Arg{
 		X: 100, Y: 4,
-	}, func(arg tpool.JobArg, res chan<- tpool.Result) error {
-		a := arg.(Arg)
-		r := a.X * a.Y
+	}, func(arg Arg, res chan<- uint) error {
+		r := arg.X * arg.Y
 		runIn := time.Duration(1000)
 		fmt.Printf("job run in %d ms\n", runIn)
 		time.Sleep(time.Millisecond * runIn)
@@ -88,9 +87,8 @@ func main() {
 
 	job4 := tpool.NewJob(Arg{
 		X: 5, Y: 5,
-	}, func(arg tpool.JobArg, res chan<- tpool.Result) error {
-		a := arg.(Arg)
-		r := a.X * a.Y
+	}, func(arg Arg, res chan<- uint) error {
+		r := arg.X * arg.Y
 		runIn := time.Duration(1000)
 		fmt.Printf("job run in %d ms\n", runIn)
 		time.Sleep(time.Millisecond * runIn)
@@ -102,21 +100,24 @@ func main() {
 	// start
 	start := time.Now()
 
-	jobs := []tpool.Job{job1, job2, job3, job4}
+	jobs := []tpool.Job[Arg, uint]{job1, job2, job3, job4}
 
 	ctx, cancel := context.WithCancel(context.Background())
+	// ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*800)
 	defer func() { cancel() }()
 
-	threadPool := tpool.NewThreadPool(3)
+	threadPool := tpool.NewThreadPool[Arg, uint](3)
 	threadPool.GenerateJobFrom(jobs)
 
 	threadPool.Run(ctx)
 
+labelF:
 	for {
 		select {
 		case r, ok := <-threadPool.Result():
 			if !ok {
-				break
+				fmt.Println("here..")
+				break labelF
 			}
 
 			fmt.Println(r)
@@ -125,7 +126,7 @@ func main() {
 			elapsed := time.Since(start)
 
 			fmt.Printf("all worker run in %s\n", elapsed)
-			return
+			break labelF
 		}
 	}
 
