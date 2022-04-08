@@ -38,7 +38,7 @@ func httpGet(url string) (*http.Response, error) {
 
 func main() {
 	arg := "https://www.w3schools.com/js/default.asp"
-	job1 := tpool.NewJob(arg, func(arg string, res chan<- tpool.Result) error {
+	job1 := tpool.NewJob(arg, func(arg string, res chan<- string) error {
 		start := time.Now()
 		// todo
 		resp, err := httpGet(arg)
@@ -54,7 +54,7 @@ func main() {
 		return nil
 	})
 
-	job2 := tpool.NewJob(arg, func(arg string, res chan<- tpool.Result) error {
+	job2 := tpool.NewJob(arg, func(arg string, res chan<- string) error {
 		start := time.Now()
 		// todo
 		resp, err := httpGet(arg)
@@ -70,7 +70,7 @@ func main() {
 		return nil
 	})
 
-	job3 := tpool.NewJob(arg, func(arg string, res chan<- tpool.Result) error {
+	job3 := tpool.NewJob(arg, func(arg string, res chan<- string) error {
 		start := time.Now()
 		// todo
 		resp, err := httpGet(arg)
@@ -86,7 +86,7 @@ func main() {
 		return nil
 	})
 
-	job4 := tpool.NewJob(arg, func(arg string, res chan<- tpool.Result) error {
+	job4 := tpool.NewJob(arg, func(arg string, res chan<- string) error {
 		start := time.Now()
 		// todo
 		resp, err := httpGet(arg)
@@ -102,7 +102,7 @@ func main() {
 		return nil
 	})
 
-	job5 := tpool.NewJob(arg, func(arg string, res chan<- tpool.Result) error {
+	job5 := tpool.NewJob(arg, func(arg string, res chan<- string) error {
 		start := time.Now()
 		// todo
 		resp, err := httpGet(arg)
@@ -118,7 +118,7 @@ func main() {
 		return nil
 	})
 
-	job6 := tpool.NewJob(arg, func(arg string, res chan<- tpool.Result) error {
+	job6 := tpool.NewJob(arg, func(arg string, res chan<- string) error {
 		start := time.Now()
 		// todo
 		resp, err := httpGet(arg)
@@ -134,7 +134,7 @@ func main() {
 		return nil
 	})
 
-	job7 := tpool.NewJob(arg, func(arg string, res chan<- tpool.Result) error {
+	job7 := tpool.NewJob(arg, func(arg string, res chan<- string) error {
 		start := time.Now()
 		// todo
 		resp, err := httpGet(arg)
@@ -150,7 +150,7 @@ func main() {
 		return nil
 	})
 
-	job8 := tpool.NewJob(arg, func(arg string, res chan<- tpool.Result) error {
+	job8 := tpool.NewJob(arg, func(arg string, res chan<- string) error {
 		start := time.Now()
 		// todo
 		resp, err := httpGet(arg)
@@ -169,13 +169,13 @@ func main() {
 	// start
 	start := time.Now()
 
-	jobs := []tpool.Job[string]{job1, job2, job3, job4, job5, job6, job7, job8}
+	jobs := []tpool.Job[string, string]{job1, job2, job3, job4, job5, job6, job7, job8}
 
 	ctx, cancel := context.WithCancel(context.Background())
 	// ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*800)
 	defer func() { cancel() }()
 
-	threadPool := tpool.NewThreadPool[string](4)
+	threadPool := tpool.NewThreadPool[string, string](4)
 	threadPool.GenerateJobFrom(jobs)
 
 	threadPool.Run(ctx)
